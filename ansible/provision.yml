@@ -1,0 +1,36 @@
+- name: Provision LAMP components inside Kubernetes
+  hosts: k8s_control
+  tasks:
+    - name: Build MySQL image
+      community.docker.docker_image:
+        build:
+          path: ../base-images/mysql
+        name: mysql-base
+        tag: latest
+
+    - name: Build Apache+PHP image
+      community.docker.docker_image:
+        build:
+          path: ../base-images/apache
+        name: apache-php-base
+        tag: latest
+
+    - name: Apply namespace
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', '../k8s/namespace.yaml') }}"
+
+    - name: Apply PVC
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', '../k8s/storage.yaml') }}"
+
+    - name: Deploy MySQL
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', '../k8s/mysql-deploy.yaml') }}"
+
+    - name: Deploy Apache+PHP
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', '../k8s/apache-deploy.yaml') }}"
+
+    - name: Expose Apache Service
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', '../k8s/lamp-service.yaml') }}"

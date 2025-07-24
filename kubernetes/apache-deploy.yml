@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apache
+  namespace: lamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apache
+  template:
+    metadata:
+      labels:
+        app: apache
+    spec:
+      containers:
+        - name: apache
+          image: apache-php-base:latest
+          volumeMounts:
+            - name: web-content
+              mountPath: /var/www/html
+      volumes:
+        - name: web-content
+          emptyDir: {}
